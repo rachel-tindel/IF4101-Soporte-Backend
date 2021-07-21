@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 
 namespace Soporte_HelpDesk.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class SupervisorController : Controller
     {
 
@@ -23,7 +25,7 @@ namespace Soporte_HelpDesk.Controllers
         [Route("[action]")]
         [EnableCors("GetAllPolicy")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Supervisor>>> GetStudentsAngular()
+        public async Task<ActionResult<IEnumerable<Supervisor>>> GetSupervisors()
         {
             return await _context.Supervisors.Include(s => s.IdIssueNavigation).Include(s => s.IdNoteNavigation).Select(supervisorItem => new Supervisor()
             {
@@ -39,79 +41,83 @@ namespace Soporte_HelpDesk.Controllers
             }).ToListAsync();
         }
 
-        // GET: SupervisorController
-        public ActionResult Index()
+        [Route("[action]/{id}")]
+        [EnableCors("GetAllPolicy")]
+        [HttpGet]
+        public async Task<ActionResult<Supervisor>> GetSupervisor(int id)
         {
-            return View();
-        }
+            var supervisor = await _context.Supervisors.FindAsync(id);
 
+            if (supervisor == null)
+            {
+                return NotFound();
+            }
+
+            return supervisor;
+        }
         // GET: SupervisorController/Details/5
-        public ActionResult Details(int id)
+        [Route("[action]/{id}")]
+        [EnableCors("GetAllPolicy")]
+        [HttpPut]
+        public async Task<IActionResult> PutSupervisor(int id, Supervisor supervisor) //No se usa
         {
-            return View();
-        }
+            if (id != supervisor.IdSupervisor)
+            {
+                return BadRequest();
+            }
 
-        // GET: SupervisorController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
+            _context.Entry(supervisor).State = EntityState.Modified;
 
-        // POST: SupervisorController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
-        {
             try
             {
-                return RedirectToAction(nameof(Index));
+                await _context.SaveChangesAsync();
             }
-            catch
+            catch (DbUpdateConcurrencyException)
             {
-                return View();
+                if (!SupervisorExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
             }
+
+            return NoContent();
         }
 
-        // GET: SupervisorController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: SupervisorController/Edit/5
+        [Route("[action]")]
+        [EnableCors("GetAllPolicy")]
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public async Task<ActionResult<Supervisor>> PostSupervisor(Supervisor supervisor)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            _context.Supervisors.Add(supervisor);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetSupervisor", new { id = supervisor.IdSupervisor }, supervisor);
         }
 
-        // GET: SupervisorController/Delete/5
-        public ActionResult Delete(int id)
+        [Route("[action]/{id}")]
+        [EnableCors("GetAllPolicy")]
+        [HttpDelete]
+        public async Task<ActionResult<Supervisor>> DeleteSupervisor(int id) //No se usa
         {
-            return View();
+            var supervisor = await _context.Supervisors.FindAsync(id);
+            if (supervisor == null)
+            {
+                return NotFound();
+            }
+
+            _context.Supervisors.Remove(supervisor);
+            await _context.SaveChangesAsync();
+
+            return supervisor;
         }
 
-        // POST: SupervisorController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        private bool SupervisorExists(int id)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            return _context.Supervisors.Any(e => e.IdSupervisor == id);
         }
     }
 }

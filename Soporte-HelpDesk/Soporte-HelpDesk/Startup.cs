@@ -42,7 +42,7 @@ namespace Soporte_HelpDesk
                 options.AddPolicy("GetAllPolicy",
                   builder =>
                   {
-                      builder.WithOrigins("http://localhost:4200", "http://localhost:4200/students")
+                      builder.WithOrigins("http://localhost:4200", "http://localhost:4200/students", "https://localhost:44359/api/Supervisor")
                                           .AllowAnyHeader()
                                           .AllowAnyMethod();//PUT, PATCH, GET, DELETE
                   });
@@ -60,6 +60,8 @@ namespace Soporte_HelpDesk
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors();
 
             app.UseAuthorization();
 
