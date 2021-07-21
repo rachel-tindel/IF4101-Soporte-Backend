@@ -55,6 +55,7 @@ namespace Soporte_HelpDesk.Controllers
 
             return supervisor;
         }
+
         // GET: SupervisorController/Details/5
         [Route("[action]/{id}")]
         [EnableCors("GetAllPolicy")]
@@ -118,6 +119,59 @@ namespace Soporte_HelpDesk.Controllers
         private bool SupervisorExists(int id)
         {
             return _context.Supervisors.Any(e => e.IdSupervisor == id);
+        }
+
+        private bool SupervisorExists(string email)
+        {
+            return _context.Supervisors.Any(e => e.EmailSupervisor == email);
+        }
+
+        [Route("[action]/{email}/{password}")]
+        [EnableCors("GetAllPolicy")]
+        [HttpGet]
+        public async Task<ActionResult<Supervisor>> GetLogin(string email, string password)
+        {
+
+            try
+            {
+
+                List<Supervisor> supervisorsList = await _context.Supervisors.Include(s => s.IdIssueNavigation).Include(s => s.IdNoteNavigation).Select(supervisorItem => new Supervisor()
+                {
+                    IdSupervisor = supervisorItem.IdSupervisor,
+                    DescriptionSupervisor = supervisorItem.DescriptionSupervisor,
+                    NameSupervisor = supervisorItem.NameSupervisor,
+                    FirstSurnameSupervisor = supervisorItem.FirstSurnameSupervisor,
+                    SecondSurnameSupervisor = supervisorItem.SecondSurnameSupervisor,
+                    EmailSupervisor = supervisorItem.EmailSupervisor,
+                    Password = supervisorItem.Password,
+                    IdIssueNavigation = supervisorItem.IdIssueNavigation,
+                    IdNoteNavigation = supervisorItem.IdNoteNavigation
+                }).ToListAsync();
+
+                foreach (Supervisor supervisors in supervisorsList)
+                {
+                    if (supervisors.EmailSupervisor.Equals(email) && supervisors.Password.Equals(password))
+                    {
+                         return supervisors;
+                    } 
+                }
+
+                return BadRequest();
+               
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+               
+                if (!SupervisorExists(email))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
         }
     }
 }
