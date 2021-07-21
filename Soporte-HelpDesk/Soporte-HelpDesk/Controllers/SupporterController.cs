@@ -26,7 +26,7 @@ namespace Soporte_HelpDesk.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Supporter>>> GetSupporters()
         {
-            return await _context.Supporters.Include(s => s.IdServiceNavigation).Include(s => s.IdSupervisorNavigation).Include(s => s.IdIssueNavigation).Include(s => s.IdNoteNavigation).Select(supporterItem => new Supporter()
+            return await _context.Supporters.Include(s => s.IdSupervisorNavigation).Include(s => s.IdIssueNavigation).Include(s => s.IdNoteNavigation).Select(supporterItem => new Supporter()
             {
                 IdSoporter = supporterItem.IdSoporter,
                 NameSupporter = supporterItem.NameSupporter,
@@ -34,7 +34,6 @@ namespace Soporte_HelpDesk.Controllers
                 SecondSurnameSupporter = supporterItem.SecondSurnameSupporter,
                 EmailSupporter = supporterItem.EmailSupporter,
                 Password = supporterItem.Password,
-                IdServiceNavigation = supporterItem.IdServiceNavigation,
                 IdSupervisorNavigation = supporterItem.IdSupervisorNavigation,
                 IdIssueNavigation = supporterItem.IdIssueNavigation,
                 IdNoteNavigation = supporterItem.IdNoteNavigation

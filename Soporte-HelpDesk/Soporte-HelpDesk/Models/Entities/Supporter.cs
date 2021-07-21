@@ -17,10 +17,13 @@ namespace Soporte_HelpDesk.Models.Entities
         public int? IdIssue { get; set; }
         public int? IdNote { get; set; }
         public string Password { get; set; }
+        public int? Cable { get; set; }
+        public int? Mobilephone { get; set; }
+        public int? Telephone { get; set; }
+        public int? Internet { get; set; }
 
         public virtual Issue IdIssueNavigation { get; set; }
         public virtual Note IdNoteNavigation { get; set; }
-        public virtual Servicee IdServiceNavigation { get; set; }
         public virtual Supervisor IdSupervisorNavigation { get; set; }
     }
 }

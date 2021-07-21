@@ -189,6 +189,8 @@ namespace Soporte_HelpDesk.Models.Entities
 
                 entity.Property(e => e.IdSoporter).HasColumnName("id_soporter");
 
+                entity.Property(e => e.Cable).HasColumnName("cable");
+
                 entity.Property(e => e.EmailSupporter)
                     .IsRequired()
                     .HasMaxLength(100)
@@ -209,6 +211,10 @@ namespace Soporte_HelpDesk.Models.Entities
 
                 entity.Property(e => e.IdSupervisor).HasColumnName("id_supervisor");
 
+                entity.Property(e => e.Internet).HasColumnName("internet");
+
+                entity.Property(e => e.Mobilephone).HasColumnName("mobilephone");
+
                 entity.Property(e => e.NameSupporter)
                     .IsRequired()
                     .HasMaxLength(50)
@@ -226,6 +232,8 @@ namespace Soporte_HelpDesk.Models.Entities
                     .IsUnicode(false)
                     .HasColumnName("second_surname_supporter");
 
+                entity.Property(e => e.Telephone).HasColumnName("telephone");
+
                 entity.HasOne(d => d.IdIssueNavigation)
                     .WithMany(p => p.Supporters)
                     .HasForeignKey(d => d.IdIssue)
@@ -235,11 +243,6 @@ namespace Soporte_HelpDesk.Models.Entities
                     .WithMany(p => p.Supporters)
                     .HasForeignKey(d => d.IdNote)
                     .HasConstraintName("FK_SUPPORTER_NOTE");
-
-                entity.HasOne(d => d.IdServiceNavigation)
-                    .WithMany(p => p.Supporters)
-                    .HasForeignKey(d => d.IdService)
-                    .HasConstraintName("FK_SUPPORTER_SERVICEE");
 
                 entity.HasOne(d => d.IdSupervisorNavigation)
                     .WithMany(p => p.Supporters)
