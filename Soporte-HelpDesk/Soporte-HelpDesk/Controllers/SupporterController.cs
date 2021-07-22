@@ -66,5 +66,58 @@ namespace Soporte_HelpDesk.Controllers
             return CreatedAtAction("GetSupervisor", new { id = supporter.IdSoporter }, supporter);
         }
 
+        private bool SupporterExists(string email)
+        {
+            return _context.Supporters.Any(e => e.EmailSupporter == email);
+        }
+
+        [Route("[action]/{email}/{password}")]
+        [EnableCors("GetAllPolicy")]
+        [HttpGet]
+        public async Task<ActionResult<Supporter>> GetLogin(string email, string password)
+        {
+
+            try
+            {
+
+                List<Supporter> supervisorsList = await _context.Supporters.Include(s => s.IdSupervisorNavigation).Include(s => s.IdIssueNavigation).Include(s => s.IdNoteNavigation).Select(supporterItem => new Supporter()
+                {
+                    IdSoporter = supporterItem.IdSoporter,
+                    NameSupporter = supporterItem.NameSupporter,
+                    FirstSurnameSupporter = supporterItem.FirstSurnameSupporter,
+                    SecondSurnameSupporter = supporterItem.SecondSurnameSupporter,
+                    EmailSupporter = supporterItem.EmailSupporter,
+                    Password = supporterItem.Password,
+                    IdSupervisorNavigation = supporterItem.IdSupervisorNavigation,
+                    IdIssueNavigation = supporterItem.IdIssueNavigation,
+                    IdNoteNavigation = supporterItem.IdNoteNavigation
+                }).ToListAsync();
+
+                foreach (Supporter supervisors in supervisorsList)
+                {
+                    if (supervisors.EmailSupporter.Equals(email) && supervisors.Password.Equals(password))
+                    {
+                        return supervisors;
+                    }
+                }
+
+                return BadRequest();
+
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+
+                if (!SupporterExists(email))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+        }
+
     }
 }
