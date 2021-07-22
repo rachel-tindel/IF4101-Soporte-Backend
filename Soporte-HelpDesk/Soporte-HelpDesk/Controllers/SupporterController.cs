@@ -26,18 +26,27 @@ namespace Soporte_HelpDesk.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Supporter>>> GetSupporters()
         {
-            return await _context.Supporters.Include(s => s.IdSupervisorNavigation).Include(s => s.IdIssueNavigation).Include(s => s.IdNoteNavigation).Select(supporterItem => new Supporter()
+            try {
+
+                return await _context.Supporters.Include(s => s.IdSupervisorNavigation).Include(s => s.IdIssueNavigation).Include(s => s.IdNoteNavigation).Select(supporterItem => new Supporter()
+                {
+                    IdSoporter = supporterItem.IdSoporter,
+                    NameSupporter = supporterItem.NameSupporter,
+                    FirstSurnameSupporter = supporterItem.FirstSurnameSupporter,
+                    SecondSurnameSupporter = supporterItem.SecondSurnameSupporter,
+                    EmailSupporter = supporterItem.EmailSupporter,
+                    Password = supporterItem.Password,
+                    IdSupervisorNavigation = supporterItem.IdSupervisorNavigation,
+                    IdIssueNavigation = supporterItem.IdIssueNavigation,
+                    IdNoteNavigation = supporterItem.IdNoteNavigation
+                }).ToListAsync();
+            }
+            catch (DbUpdateConcurrencyException)
             {
-                IdSoporter = supporterItem.IdSoporter,
-                NameSupporter = supporterItem.NameSupporter,
-                FirstSurnameSupporter = supporterItem.FirstSurnameSupporter,
-                SecondSurnameSupporter = supporterItem.SecondSurnameSupporter,
-                EmailSupporter = supporterItem.EmailSupporter,
-                Password = supporterItem.Password,
-                IdSupervisorNavigation = supporterItem.IdSupervisorNavigation,
-                IdIssueNavigation = supporterItem.IdIssueNavigation,
-                IdNoteNavigation = supporterItem.IdNoteNavigation
-            }).ToListAsync();
+
+                return BadRequest();
+
+            }            
         }
 
         [Route("[action]/{id}")]
@@ -45,14 +54,20 @@ namespace Soporte_HelpDesk.Controllers
         [HttpGet]
         public async Task<ActionResult<Supporter>> GetSupporter (int id)
         {
-            var supporter = await _context.Supporters.FindAsync(id);
-
-            if (supporter == null)
+            try
             {
-                return NotFound();
-            }
+                var supporter = await _context.Supporters.FindAsync(id);
 
-            return supporter;
+                if (supporter == null)
+                {
+                    return NotFound();
+                }
+                return supporter;
+            }
+            catch (DbUpdateConcurrencyException) {
+
+                return BadRequest();
+            }                
         }
 
         [Route("[action]")]
@@ -60,10 +75,18 @@ namespace Soporte_HelpDesk.Controllers
         [HttpPost]
         public async Task<ActionResult<Supporter>> PostSupporter(Supporter supporter)
         {
-            _context.Supporters.Add(supporter);
-            await _context.SaveChangesAsync();
+            try {
 
-            return CreatedAtAction("GetSupervisor", new { id = supporter.IdSoporter }, supporter);
+                _context.Supporters.Add(supporter);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction("GetSupervisor", new { id = supporter.IdSoporter }, supporter);
+
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return BadRequest();
+            }           
         }
 
         private bool SupporterExists(string email)
@@ -76,10 +99,8 @@ namespace Soporte_HelpDesk.Controllers
         [HttpGet]
         public async Task<ActionResult<Supporter>> GetLogin(string email, string password)
         {
-
             try
             {
-
                 List<Supporter> supervisorsList = await _context.Supporters.Include(s => s.IdSupervisorNavigation).Include(s => s.IdIssueNavigation).Include(s => s.IdNoteNavigation).Select(supporterItem => new Supporter()
                 {
                     IdSoporter = supporterItem.IdSoporter,
@@ -100,9 +121,7 @@ namespace Soporte_HelpDesk.Controllers
                         return supervisors;
                     }
                 }
-
                 return BadRequest();
-
             }
             catch (DbUpdateConcurrencyException)
             {

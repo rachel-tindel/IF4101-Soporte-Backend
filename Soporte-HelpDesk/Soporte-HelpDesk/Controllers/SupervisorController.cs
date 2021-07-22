@@ -27,18 +27,25 @@ namespace Soporte_HelpDesk.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Supervisor>>> GetSupervisors()
         {
-            return await _context.Supervisors.Include(s => s.IdIssueNavigation).Include(s => s.IdNoteNavigation).Select(supervisorItem => new Supervisor()
+            try {
+                return await _context.Supervisors.Include(s => s.IdIssueNavigation).Include(s => s.IdNoteNavigation).Select(supervisorItem => new Supervisor()
+                {
+                    IdSupervisor = supervisorItem.IdSupervisor,
+                    DescriptionSupervisor = supervisorItem.DescriptionSupervisor,
+                    NameSupervisor = supervisorItem.NameSupervisor,
+                    FirstSurnameSupervisor = supervisorItem.FirstSurnameSupervisor,
+                    SecondSurnameSupervisor = supervisorItem.SecondSurnameSupervisor,
+                    EmailSupervisor = supervisorItem.EmailSupervisor,
+                    Password = supervisorItem.Password,
+                    IdIssueNavigation = supervisorItem.IdIssueNavigation,
+                    IdNoteNavigation = supervisorItem.IdNoteNavigation
+                }).ToListAsync();
+            }
+            catch (DbUpdateConcurrencyException)
             {
-                IdSupervisor = supervisorItem.IdSupervisor,
-                DescriptionSupervisor = supervisorItem.DescriptionSupervisor,
-                NameSupervisor = supervisorItem.NameSupervisor,
-                FirstSurnameSupervisor = supervisorItem.FirstSurnameSupervisor,
-                SecondSurnameSupervisor = supervisorItem.SecondSurnameSupervisor,
-                EmailSupervisor = supervisorItem.EmailSupervisor,
-                Password = supervisorItem.Password,
-                IdIssueNavigation = supervisorItem.IdIssueNavigation,
-                IdNoteNavigation = supervisorItem.IdNoteNavigation
-            }).ToListAsync();
+                return BadRequest();
+            }
+            
         }
 
         [Route("[action]/{id}")]
@@ -46,21 +53,28 @@ namespace Soporte_HelpDesk.Controllers
         [HttpGet]
         public async Task<ActionResult<Supervisor>> GetSupervisor(int id)
         {
-            var supervisor = await _context.Supervisors.FindAsync(id);
+            try {
+                  var supervisor = await _context.Supervisors.FindAsync(id);
 
-            if (supervisor == null)
-            {
-                return NotFound();
+                  if (supervisor == null)
+                  {
+                    return NotFound();
+                  }
+
+               return supervisor;
             }
-
-            return supervisor;
+            catch (DbUpdateConcurrencyException)
+            {
+                return BadRequest();
+            }
+  
         }
 
         // GET: SupervisorController/Details/5
         [Route("[action]/{id}")]
         [EnableCors("GetAllPolicy")]
         [HttpPut]
-        public async Task<IActionResult> PutSupervisor(int id, Supervisor supervisor) //No se usa
+        public async Task<IActionResult> PutSupervisor(int id, Supervisor supervisor) 
         {
             if (id != supervisor.IdSupervisor)
             {
@@ -93,27 +107,18 @@ namespace Soporte_HelpDesk.Controllers
         [HttpPost]
         public async Task<ActionResult<Supervisor>> PostSupervisor(Supervisor supervisor)
         {
-            _context.Supervisors.Add(supervisor);
-            await _context.SaveChangesAsync();
+            try {
+                _context.Supervisors.Add(supervisor);
+                await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetSupervisor", new { id = supervisor.IdSupervisor }, supervisor);
-        }
-
-        [Route("[action]/{id}")]
-        [EnableCors("GetAllPolicy")]
-        [HttpDelete]
-        public async Task<ActionResult<Supervisor>> DeleteSupervisor(int id) //No se usa
-        {
-            var supervisor = await _context.Supervisors.FindAsync(id);
-            if (supervisor == null)
-            {
-                return NotFound();
+                return CreatedAtAction("GetSupervisor", new { id = supervisor.IdSupervisor }, supervisor);
             }
+            catch (DbUpdateConcurrencyException)
+            {
 
-            _context.Supervisors.Remove(supervisor);
-            await _context.SaveChangesAsync();
+                return BadRequest();
 
-            return supervisor;
+            }
         }
 
         private bool SupervisorExists(int id)
